@@ -34,5 +34,5 @@ dependencies {
 //    implementation project(':Permissions')
     implementation 'org.simple:androideventbus:1.0.5.1'
 
-    implementation 'com.gitee.deparse:simple-permissions:1.0.0'
+    implementation 'com.gitee.lnvip:simple-permissions:1.0.0'
 }
