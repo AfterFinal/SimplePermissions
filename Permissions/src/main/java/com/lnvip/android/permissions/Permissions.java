@@ -23,6 +23,7 @@ public class Permissions {
 
     static final String KEY_CALLBACKID = "KEY_CALLBACKID";
     static final String KEY_PERMISSIONS = "KEY_PERMISSIONS";
+    static final String KEY_TIP_MODE = "KEY_SHOW_TIPS_WHEN_REJECTED";
 
     private static final Map<String, String[]> permissionNamesMap = new HashMap<>();
 
@@ -78,6 +79,10 @@ public class Permissions {
     }
 
     public static void request(Context context, Callback callback, String... permissions) {
+        request(context, TipMode.Dialog, callback, permissions);
+    }
+
+    public static void request(Context context, TipMode mode, Callback callback, String... permissions) {
         boolean granted = true;
         for (String permission : permissions) {
             if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(context, permission)) {
@@ -94,6 +99,7 @@ public class Permissions {
         Intent intent = new Intent(context, PermissionActivity.class);
         intent.putExtra(KEY_CALLBACKID, callbackId);
         intent.putExtra(KEY_PERMISSIONS, permissions);
+        intent.putExtra(KEY_TIP_MODE, mode);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }

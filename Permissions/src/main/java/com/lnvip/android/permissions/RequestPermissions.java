@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface RequestPermissions {
     String[] value();
+
+    boolean showTipsWhenRejected() default true;
 }
