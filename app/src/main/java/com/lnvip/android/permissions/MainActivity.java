@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.SYSTEM_ALERT_WINDOW
-    })
+    }, tipMode = TipMode.Dialog)
     private void doRequestUsePermissions() {
         Toast.makeText(MainActivity.this, "doRequestUsePermissions", Toast.LENGTH_SHORT).show();
     }
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
     @Override
     public void onPermissionRequestResult(IProceedingJoinPoint joinPoint, List<String> granted, List<String> rejected) {
         try {
-            joinPoint.proceed();
+            joinPoint.proceed();//此处相当于实际调用doRequestUsePermissions方法
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
