@@ -1,15 +1,15 @@
 # SimplePermissions
 
-#### 介绍
+### 介绍
 简化动态权限申请
 
-#### 软件架构
+### 软件架构
 AspectJ + 注解
 
 
-#### 使用说明
+### 使用说明
 
-项目根目录build.gradle配置:
+#### 项目根目录build.gradle配置:
 ```
 buildscript {
     repositories {
@@ -23,7 +23,7 @@ buildscript {
 }
 ```
 
-模块build.gradle配置:
+#### 模块build.gradle配置:
 ```
 apply plugin: 'android-aspectjx'
 
@@ -32,30 +32,38 @@ dependencies {
 }
 ```
 
-初始化：
+#### 初始化：
 ```
 Permissions.init(this);
 ```
 
-注解申请权限：
+#### 注解申请权限：
 ```
-    @RequestPermissions({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA})
-    private void doOnCreate() {
+    @RequestPermissions({
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.SYSTEM_ALERT_WINDOW
+    })
+    private void doRequestUsePermissions() {
+        Toast.makeText(MainActivity.this, "doRequestUsePermissions", Toast.LENGTH_SHORT).show();
     }
 ```
 
-接口申请权限：
+#### 接口申请权限：
 ```
        Permissions.request(new Permissions.Callback() {
             @Override
             public void onResult(final List<String> granted, final List<String> rejected) {
                 if (0 == rejected.size()) {
-                    EventBus.getDefault().post("success", "on_init_permissions_result");
+                    //权限申请成功
                 } else {
-                    EventBus.getDefault().post("以下权限申请失败:\n" + Permissions.getPermissionNames(rejected, "\n"), "on_init_permissions_result");
+                    Toast.makeText(context, "以下权限申请失败:\n" + Permissions.getPermissionNames(rejected, "\n"),Toast.LENGTH_SHORT).show();
                 }
             }
         }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA);
 ```
 
-
+#### 更多高级用法请参考源码
