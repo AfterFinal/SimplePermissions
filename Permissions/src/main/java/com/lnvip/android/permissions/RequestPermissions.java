@@ -12,8 +12,4 @@ public @interface RequestPermissions {
     String[] value();
 
     TipMode tipMode() default TipMode.Dialog;
-
-    Class<? extends PermissionRequestCallback> callback() default PermissionRequestCallback.class;
-
-    String callbackMethod() default "";
 }

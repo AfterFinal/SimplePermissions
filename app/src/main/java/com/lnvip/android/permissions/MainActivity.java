@@ -11,7 +11,7 @@ import com.lnvip.android.permissions.aspect.IProceedingJoinPoint;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PermissionRequestCallback {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,28 +30,17 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.SYSTEM_ALERT_WINDOW
-    }, callbackMethod = "onPermissionRequestResult", callback = Callback1.class)
+    })
     private void doRequestUsePermissions() {
         Toast.makeText(MainActivity.this, "doRequestUsePermissions", Toast.LENGTH_SHORT).show();
     }
 
+    @Override
     public void onPermissionRequestResult(IProceedingJoinPoint joinPoint, List<String> granted, List<String> rejected) {
         try {
             joinPoint.proceed();
         } catch (Throwable throwable) {
             throwable.printStackTrace();
-        }
-    }
-
-    public static class Callback1 implements PermissionRequestCallback {
-
-        @Override
-        public void onResult(IProceedingJoinPoint joinPoint, List<String> granted, List<String> rejected) {
-            try {
-                joinPoint.proceed();
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
         }
     }
 }
