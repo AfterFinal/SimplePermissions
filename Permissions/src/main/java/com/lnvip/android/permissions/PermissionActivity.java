@@ -1,25 +1,25 @@
 package com.lnvip.android.permissions;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+
+import com.lnvip.android.permissions.api.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PermissionActivity extends AppCompatActivity {
+public class PermissionActivity extends TransparentActivity {
     private static final int REQUEST_PERMISSIONS = 0x7038;
     private static final int REQUEST_PERMISSIONS_SETTINGS = 0x7347;
 
@@ -34,24 +34,30 @@ public class PermissionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Window window = getWindow();
-        WindowManager.LayoutParams lp = window.getAttributes();
-        lp.width = 1;
-        lp.height = 1;
-        lp.x = -1;
-        lp.y = -1;
-        window.setAttributes(lp);
 
         permissions = getIntent().getStringArrayExtra(Permissions.KEY_PERMISSIONS);
         tipMode = (TipMode) getIntent().getSerializableExtra(Permissions.KEY_TIP_MODE);
-        callback = Permissions.callbackMap.remove(getIntent().getStringExtra(Permissions.KEY_CALLBACKID));
+        callback = Permissions.callbackMap.remove(getIntent().getStringExtra(Permissions.KEY_CALLBACK_ID));
 
-        if (null == permissions || 0 == permissions.length) {
-            check();
-            dispatchRequestFinish();
-            return;
+        requestPermissions();
+    }
+
+    private void requestPermissions() {
+        check();
+        if (rejected.contains(Manifest.permission.SYSTEM_ALERT_WINDOW) && !SystemAlertPermission.hasPermission(this)) {
+            SystemAlertPermission.request(this, new SystemAlertPermission.Callback() {
+                @Override
+                public void onResult(boolean isGranted) {
+                    if (isGranted) {
+                        granted.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
+                        rejected.remove(Manifest.permission.SYSTEM_ALERT_WINDOW);
+                    }
+                    ActivityCompat.requestPermissions(PermissionActivity.this, permissions, REQUEST_PERMISSIONS);
+                }
+            });
+        } else {
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS);
         }
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS);
     }
 
     @Override
@@ -66,7 +72,7 @@ public class PermissionActivity extends AppCompatActivity {
                     dispatchRequestFinish();
                     break;
                 case Toast:
-                    Toast.makeText(getApplicationContext(), "缺少必要权限:\n" + Permissions.getPermissionNames(rejected, "\n"), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), Util.getString(R.string.sp_permissions_lacked) + "\n" + Permissions.getPermissionNames(rejected, "\n"), Toast.LENGTH_SHORT).show();
                     finish();
                     break;
                 case Dialog:
@@ -94,10 +100,18 @@ public class PermissionActivity extends AppCompatActivity {
         rejected.clear();
         if (null != permissions && permissions.length > 0) {
             for (String permission : permissions) {
-                if (PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this, permission)) {
-                    granted.add(permission);
+                if (Manifest.permission.SYSTEM_ALERT_WINDOW.equals(permission)) {
+                    if (SystemAlertPermission.hasPermission(this)) {
+                        granted.add(permission);
+                    } else {
+                        rejected.add(permission);
+                    }
                 } else {
-                    rejected.add(permission);
+                    if (PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this, permission)) {
+                        granted.add(permission);
+                    } else {
+                        rejected.add(permission);
+                    }
                 }
             }
         }
@@ -113,9 +127,9 @@ public class PermissionActivity extends AppCompatActivity {
     private void showRequestPermissionSettingDialog() {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
-                .setTitle("缺少必要权限：")
+                .setTitle(Util.getString(R.string.sp_permissions_lacked))
                 .setMessage(Permissions.getPermissionNames(rejected, "\n"))
-                .setPositiveButton("设置", new DialogInterface.OnClickListener() {
+                .setPositiveButton(Util.getString(R.string.sp_go_setting), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
@@ -125,11 +139,11 @@ public class PermissionActivity extends AppCompatActivity {
                             intent.setData(uri);
                             startActivityForResult(intent, REQUEST_PERMISSIONS_SETTINGS);
                         } catch (Exception e) {
-                            Toast.makeText(getApplicationContext(), "无法打开设置", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), Util.getString(R.string.sp_cannot_open_settings), Toast.LENGTH_SHORT).show();
                         }
                     }
                 })
-                .setNeutralButton("关闭", new DialogInterface.OnClickListener() {
+                .setNegativeButton(Util.getString(R.string.sp_go_close), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();

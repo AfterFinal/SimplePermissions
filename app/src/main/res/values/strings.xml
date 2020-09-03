@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Permissions</string>
+    <string name="app_name">Runtime Permissions Demo</string>
+    <string name="request_permissions">Request Permissions</string>
 </resources>

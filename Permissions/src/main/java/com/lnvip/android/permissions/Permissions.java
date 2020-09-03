@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 
 import com.lnvip.android.permissions.api.R;
-import com.lnvip.android.permissions.aspect.IProceedingJoinPoint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,16 +20,13 @@ import java.util.UUID;
 public class Permissions {
     private static Application sApplication;
 
-    static final String KEY_CALLBACKID = "KEY_CALLBACKID";
+    static final String KEY_CALLBACK_ID = "KEY_CALLBACK_ID";
     static final String KEY_PERMISSIONS = "KEY_PERMISSIONS";
     static final String KEY_TIP_MODE = "KEY_SHOW_TIPS_WHEN_REJECTED";
 
     private static final Map<String, String[]> permissionNamesMap = new HashMap<>();
 
     static final Map<String, Callback> callbackMap = new HashMap<>();
-
-    private static PermissionResultInterceptor sPermissionResultInterceptor;
-    private static PermissionDeniedCallback sPermissionDeniedCallback;
 
     public static void init(Application app) {
         sApplication = app;
@@ -46,22 +42,6 @@ public class Permissions {
 
     public static Application getApplication() {
         return sApplication;
-    }
-
-    public static void setPermissionResultInterceptor(PermissionResultInterceptor interceptor) {
-        sPermissionResultInterceptor = interceptor;
-    }
-
-    public static PermissionResultInterceptor getPermissionResultInterceptor() {
-        return sPermissionResultInterceptor;
-    }
-
-    public static PermissionDeniedCallback getPermissionDeniedCallback() {
-        return sPermissionDeniedCallback;
-    }
-
-    public static void setPermissionDeniedCallback(PermissionDeniedCallback sPermissionDeniedCallback) {
-        Permissions.sPermissionDeniedCallback = sPermissionDeniedCallback;
     }
 
     public static String getPermissionName(String permission) {
@@ -82,7 +62,7 @@ public class Permissions {
         request(context, TipMode.Dialog, callback, permissions);
     }
 
-    public static void request(Context context, TipMode mode, Callback callback, String... permissions) {
+    public static void request(Context context, TipMode tipMode, Callback callback, String... permissions) {
         boolean granted = true;
         for (String permission : permissions) {
             if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(context, permission)) {
@@ -97,9 +77,9 @@ public class Permissions {
         String callbackId = genId(callback);
         callbackMap.put(callbackId, callback);
         Intent intent = new Intent(context, PermissionActivity.class);
-        intent.putExtra(KEY_CALLBACKID, callbackId);
+        intent.putExtra(KEY_CALLBACK_ID, callbackId);
         intent.putExtra(KEY_PERMISSIONS, permissions);
-        intent.putExtra(KEY_TIP_MODE, mode);
+        intent.putExtra(KEY_TIP_MODE, tipMode);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
@@ -126,14 +106,5 @@ public class Permissions {
         void onResult(List<String> granted, List<String> rejected);
     }
 
-    public interface PermissionResultInterceptor {
-
-        void intercept(IProceedingJoinPoint joinPoint, List<String> granted, List<String> rejected);
-    }
-
-    public interface PermissionDeniedCallback {
-
-        void onPermissionsDenied(IProceedingJoinPoint joinPoint, List<String> granted, List<String> rejected);
-    }
 
 }

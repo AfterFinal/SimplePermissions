@@ -8,7 +8,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface RequestPermissions {
+
     String[] value();
 
-    boolean showTipsWhenRejected() default true;
+    TipMode tipMode() default TipMode.Dialog;
+
+    Class<? extends PermissionRequestCallback> callback() default PermissionRequestCallback.class;
+
+    String callbackMethod() default "";
 }

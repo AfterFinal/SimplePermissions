@@ -1,13 +1,8 @@
 package com.lnvip.android.permissions.aspect;
 
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
-import android.provider.Settings;
-import android.widget.Toast;
+import android.text.TextUtils;
 
-import androidx.appcompat.app.AlertDialog;
-
+import com.lnvip.android.permissions.PermissionRequestCallback;
 import com.lnvip.android.permissions.Permissions;
 import com.lnvip.android.permissions.RequestPermissions;
 
@@ -17,10 +12,12 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
 @Aspect
+@SuppressWarnings("all")
 public class PermissionsAspect {
 
     @Pointcut("execution(@com.lnvip.android.permissions.RequestPermissions * **(..))")
@@ -42,44 +39,39 @@ public class PermissionsAspect {
                 joinPoint.proceed();
                 return;
             }
-            Permissions.request(new Permissions.Callback() {
+            Permissions.request(Permissions.getApplication(), requestPermissions.tipMode(), new Permissions.Callback() {
                 @Override
                 public void onResult(List<String> granted, List<String> rejected) {
-                    if (null != Permissions.getPermissionResultInterceptor()) {
-                        Permissions.getPermissionResultInterceptor().intercept(new ProceedingJoinPointIml(joinPoint), granted, rejected);
+                    Class<? extends PermissionRequestCallback> callbackClass = requestPermissions.callback();
+                    if (callbackClass != Permissions.Callback.class) {
+                        try {
+                            PermissionRequestCallback callback = callbackClass.newInstance();
+                            callback.onResult(new ProceedingJoinPointIml(joinPoint), granted, rejected);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     } else {
-                        if (null == rejected || 0 == rejected.size()) {
+                        String callbackMethod = requestPermissions.callbackMethod();
+                        if (!TextUtils.isEmpty(callbackMethod)) {
                             try {
-                                joinPoint.proceed();
-                            } catch (Throwable throwable) {
-                                RuntimeException exception = new RuntimeException(throwable);
-                                exception.setStackTrace(throwable.getStackTrace());
+                                Object thisObj = joinPoint.getThis();
+                                Method method = thisObj.getClass().getMethod(callbackMethod, IProceedingJoinPoint.class, List.class, List.class);
+                                if (!method.isAccessible()) {
+                                    method.setAccessible(true);
+                                }
+                                method.invoke(thisObj, new ProceedingJoinPointIml(joinPoint), granted, rejected);
+                            } catch (Exception e) {
+                                RuntimeException exception = new RuntimeException(e.getMessage());
+                                exception.setStackTrace(e.getStackTrace());
                                 throw exception;
                             }
                         } else {
-                            if (null != Permissions.getPermissionDeniedCallback()) {
-                                Permissions.getPermissionDeniedCallback().onPermissionsDenied(new ProceedingJoinPointIml(joinPoint), granted, rejected);
-                            } else if (requestPermissions.showTipsWhenRejected()) {
-                                new AlertDialog.Builder(Permissions.getApplication())
-                                        .setCancelable(false)
-                                        .setTitle("缺少必要权限：")
-                                        .setMessage(Permissions.getPermissionNames(rejected, "\n"))
-                                        .setPositiveButton("设置", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                dialogInterface.dismiss();
-                                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                                Uri uri = Uri.fromParts("package", Permissions.getApplication().getPackageName(), null);
-                                                intent.setData(uri);
-                                                Permissions.getApplication().startActivity(intent);
-                                            }
-                                        })
-                                        .setNegativeButton("关闭", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                dialogInterface.dismiss();
-                                            }
-                                        }).show();
+                            if (0 == rejected.size()) {
+                                try {
+                                    joinPoint.proceed(joinPoint.getArgs());
+                                } catch (Throwable throwable) {
+                                    throwable.printStackTrace();
+                                }
                             }
                         }
                     }

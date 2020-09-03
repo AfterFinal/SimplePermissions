@@ -7,6 +7,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.lnvip.android.permissions.aspect.IProceedingJoinPoint;
+
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -19,8 +23,23 @@ public class MainActivity extends AppCompatActivity {
         doRequestUsePermissions();
     }
 
-    @RequestPermissions({Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION})
+    @RequestPermissions(value = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.SYSTEM_ALERT_WINDOW
+    }, callbackMethod = "onPermissionRequestResult")
     private void doRequestUsePermissions() {
-        Toast.makeText(getApplicationContext(), "requestUsePermissions", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "doRequestUsePermissions", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onPermissionRequestResult(IProceedingJoinPoint joinPoint, List<String> granted, List<String> rejected) {
+        try {
+            joinPoint.proceed();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
     }
 }
