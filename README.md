@@ -39,14 +39,14 @@ Permissions.init(this);
 
 #### 注解申请权限：
 ```
-    @RequestPermissions({
+    @RequestPermissions(value = {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.SYSTEM_ALERT_WINDOW
-    })
+    }, tipMode = TipMode.Dialog)
     private void doRequestUsePermissions() {
         Toast.makeText(MainActivity.this, "doRequestUsePermissions", Toast.LENGTH_SHORT).show();
     }
@@ -61,7 +61,7 @@ class MainActivity extends AppCompatActivity implements PermissionRequestCallbac
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.SYSTEM_ALERT_WINDOW
-    })
+    }, tipMode = TipMode.Dialog)
     private void doRequestUsePermissions() {
         Toast.makeText(MainActivity.this, "doRequestUsePermissions", Toast.LENGTH_SHORT).show();
     }
