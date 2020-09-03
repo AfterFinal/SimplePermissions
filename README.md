@@ -28,7 +28,7 @@ buildscript {
 apply plugin: 'android-aspectjx'
 
 dependencies {
-    implementation 'com.gitee.lnvip:simple-permissions:V1.0.1'
+    implementation 'com.gitee.lnvip:simple-permissions:1.0.5'
 }
 ```
 
