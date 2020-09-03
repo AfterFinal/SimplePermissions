@@ -43,7 +43,7 @@ public class PermissionsAspect {
                 @Override
                 public void onResult(List<String> granted, List<String> rejected) {
                     Class<? extends PermissionRequestCallback> callbackClass = requestPermissions.callback();
-                    if (callbackClass != Permissions.Callback.class) {
+                    if (!Permissions.Callback.class.equals(callbackClass)) {
                         try {
                             PermissionRequestCallback callback = callbackClass.newInstance();
                             callback.onResult(new ProceedingJoinPointIml(joinPoint), granted, rejected);
