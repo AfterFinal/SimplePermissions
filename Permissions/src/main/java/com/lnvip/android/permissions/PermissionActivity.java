@@ -75,11 +75,7 @@ public class PermissionActivity extends TransparentActivity {
                     break;
                 case Toast:
                     Toast.makeText(getApplicationContext(), Util.getString(R.string.sp_permissions_lacked) + "\n" + Permissions.getPermissionNames(rejected, "\n"), Toast.LENGTH_SHORT).show();
-                    if (!must) {
-                        dispatchRequestFinish();
-                    } else {
-                        finish();
-                    }
+                    dispatchRequestFinish();
                     break;
                 case Dialog:
                     showRequestPermissionSettingDialog();
@@ -124,7 +120,7 @@ public class PermissionActivity extends TransparentActivity {
     }
 
     private void dispatchRequestFinish() {
-        if (null != callback) {
+        if (!must && null != callback) {
             callback.onResult(granted, rejected);
         }
         finish();
@@ -153,11 +149,7 @@ public class PermissionActivity extends TransparentActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
-                        if (!must) {
-                            dispatchRequestFinish();
-                        } else {
-                            finish();
-                        }
+                        dispatchRequestFinish();
                     }
                 }).show();
     }
