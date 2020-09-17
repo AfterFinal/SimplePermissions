@@ -11,5 +11,7 @@ public @interface RequestPermissions {
 
     String[] value();
 
+    boolean must() default true;
+
     TipMode tipMode() default TipMode.Dialog;
 }

@@ -23,6 +23,7 @@ public class PermissionActivity extends TransparentActivity {
     private static final int REQUEST_PERMISSIONS = 0x7038;
     private static final int REQUEST_PERMISSIONS_SETTINGS = 0x7347;
 
+    private boolean must = true;
     private TipMode tipMode = TipMode.Dialog;
 
     private String[] permissions;
@@ -36,6 +37,7 @@ public class PermissionActivity extends TransparentActivity {
         super.onCreate(savedInstanceState);
 
         permissions = getIntent().getStringArrayExtra(Permissions.KEY_PERMISSIONS);
+        must = getIntent().getBooleanExtra(Permissions.KEY_MUST, true);
         tipMode = (TipMode) getIntent().getSerializableExtra(Permissions.KEY_TIP_MODE);
         callback = Permissions.callbackMap.remove(getIntent().getStringExtra(Permissions.KEY_CALLBACK_ID));
 
@@ -73,7 +75,11 @@ public class PermissionActivity extends TransparentActivity {
                     break;
                 case Toast:
                     Toast.makeText(getApplicationContext(), Util.getString(R.string.sp_permissions_lacked) + "\n" + Permissions.getPermissionNames(rejected, "\n"), Toast.LENGTH_SHORT).show();
-                    finish();
+                    if (!must) {
+                        dispatchRequestFinish();
+                    } else {
+                        finish();
+                    }
                     break;
                 case Dialog:
                     showRequestPermissionSettingDialog();
@@ -147,7 +153,11 @@ public class PermissionActivity extends TransparentActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
-                        finish();
+                        if (!must) {
+                            dispatchRequestFinish();
+                        } else {
+                            finish();
+                        }
                     }
                 }).show();
     }

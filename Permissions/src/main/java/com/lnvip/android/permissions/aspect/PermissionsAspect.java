@@ -36,14 +36,22 @@ public class PermissionsAspect {
                 joinPoint.proceed();
                 return;
             }
-            Permissions.request(Permissions.getApplication(), requestPermissions.tipMode(), new Permissions.Callback() {
+            Permissions.request(Permissions.getApplication(), requestPermissions.must(), requestPermissions.tipMode(), new Permissions.Callback() {
                 @Override
                 public void onResult(List<String> granted, List<String> rejected) {
                     if (joinPoint.getThis() instanceof PermissionRequestCallback) {
                         PermissionRequestCallback callback = (PermissionRequestCallback) joinPoint.getThis();
-                        callback.onPermissionRequestResult(new ProceedingJoinPointIml(joinPoint), granted, rejected);
+                        callback.onPermissionRequestResult(new ProceedingJoinPointIml(joinPoint), requestPermissions.must(), granted, rejected);
                     } else {
-                        if (0 == rejected.size()) {
+                        if (requestPermissions.must()) {
+                            if (0 == rejected.size()) {
+                                try {
+                                    joinPoint.proceed(joinPoint.getArgs());
+                                } catch (Throwable throwable) {
+                                    throwable.printStackTrace();
+                                }
+                            }
+                        } else {
                             try {
                                 joinPoint.proceed(joinPoint.getArgs());
                             } catch (Throwable throwable) {

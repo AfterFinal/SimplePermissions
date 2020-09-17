@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
     }
 
     @Override
-    public void onPermissionRequestResult(IProceedingJoinPoint joinPoint, List<String> granted, List<String> rejected) {
+    public void onPermissionRequestResult(IProceedingJoinPoint joinPoint, boolean must, List<String> granted, List<String> rejected) {
         try {
             joinPoint.proceed();//此处相当于实际调用doRequestUsePermissions方法
         } catch (Throwable throwable) {
