@@ -28,7 +28,7 @@ buildscript {
 apply plugin: 'android-aspectjx'
 
 dependencies {
-    implementation 'com.gitee.lnvip:simple-permissions:1.0.5'
+    implementation 'com.gitee.afterfinal:simple-permissions:1.0.7'
 }
 ```
 
@@ -39,17 +39,42 @@ Permissions.init(this);
 
 #### 注解申请权限：
 ```
-    @RequestPermissions({
+    @RequestPermissions(value = {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.SYSTEM_ALERT_WINDOW
-    })
+    }, tipMode = TipMode.Dialog)
     private void doRequestUsePermissions() {
         Toast.makeText(MainActivity.this, "doRequestUsePermissions", Toast.LENGTH_SHORT).show();
     }
+```
+如果@RequestPermissions所在的类实现了PermissionRequestCallback接口，则会直接调用PermissionRequestCallback的重写方法
+```
+class MainActivity extends AppCompatActivity implements PermissionRequestCallback{
+    @RequestPermissions(value = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.SYSTEM_ALERT_WINDOW
+    }, tipMode = TipMode.Dialog)
+    private void doRequestUsePermissions() {
+        Toast.makeText(MainActivity.this, "doRequestUsePermissions", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPermissionRequestResult(IProceedingJoinPoint joinPoint, List<String> granted, List<String> rejected) {
+        try {
+            joinPoint.proceed();//此处相当于实际调用doRequestUsePermissions方法
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+    }
+}
 ```
 
 #### 接口申请权限：
