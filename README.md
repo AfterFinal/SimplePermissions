@@ -28,7 +28,7 @@ buildscript {
 apply plugin: 'android-aspectjx'
 
 dependencies {
-    implementation 'com.gitee.afterfinal:simple-permissions:1.0.7'
+    implementation 'com.gitee.afterfinal:simple-permissions:1.0.8'
 }
 ```
 
@@ -39,6 +39,8 @@ Permissions.init(this);
 
 #### 注解申请权限：
 ```
+    //must = true，权限被拒绝后，被注解的函数不会执行；
+    //must = false，权限被拒绝后，被注解的函数也会执行；
     @RequestPermissions(value = {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -46,7 +48,7 @@ Permissions.init(this);
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.SYSTEM_ALERT_WINDOW
-    }, tipMode = TipMode.Dialog)
+    }, tipMode = TipMode.Dialog, must = true)
     private void doRequestUsePermissions() {
         Toast.makeText(MainActivity.this, "doRequestUsePermissions", Toast.LENGTH_SHORT).show();
     }
